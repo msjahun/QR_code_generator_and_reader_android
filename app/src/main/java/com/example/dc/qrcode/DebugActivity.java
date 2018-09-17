@@ -18,7 +18,8 @@ public class DebugActivity extends AppCompatActivity {
 
     String Activities[] ={
             "QR code reader",
-            "QR code Generator"
+            "QR code Generator",
+            "Custom QR code Generator"
 
     };
     @Override
@@ -48,6 +49,8 @@ public class DebugActivity extends AppCompatActivity {
                         startActivity(new Intent(DebugActivity.this,ReaderActivity.class));break;
                     case 1:
                         startActivity(new Intent(DebugActivity.this,GeneratorActivity.class));break;
+                     case 2:
+                        startActivity(new Intent(DebugActivity.this,CustomisedGenerator.class));break;
 
 
                 }
