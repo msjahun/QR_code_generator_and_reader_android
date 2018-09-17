@@ -27,29 +27,7 @@ public class GeneratorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_generator);
 
 
-        text = (EditText) findViewById(R.id.text);
-
-        gen_btn = (Button) findViewById(R.id.gen_btn);
-
-        image_ImageView = (ImageView) findViewById(R.id.image_ImageView);
-
-        gen_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                text2QR = text.getText().toString().trim();
-                MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
-                try{
-                    BitMatrix bitMatrix = multiFormatWriter.encode(text2QR, BarcodeFormat.QR_CODE, 200, 200);
-                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                    Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
-                    image_ImageView.setImageBitmap(bitmap);
 
 
-                }
-                catch (WriterException e) {
-
-                }
-            }
-        });
     }
 }
