@@ -1,55 +1,114 @@
 package com.example.dc.qrcode;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static android.graphics.Color.WHITE;
+
 public class CustomisedGenerator extends AppCompatActivity {
-    EditText text;
-    Button gen_btn;
-    ImageView image_ImageView;
-    String text2QR;
+    private ImageView imageViewBitmap;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customised_generator);
+        imageViewBitmap=(ImageView)findViewById(R.id.imageViewBitmap);
+    }
+    //handling button click
+    public void GenerateClick(View view){
+        try {
+            //setting size of qr code
+            int width =300;
+            int height = 300;
+            int smallestDimension = width < height ? width : height;
 
-        text = (EditText) findViewById(R.id.text);
+            EditText editText=(EditText)findViewById(R.id.editText) ;
+            String qrCodeData = editText.getText().toString();
+            //setting parameters for qr code
+            String charset = "UTF-8";
+            Map<EncodeHintType, ErrorCorrectionLevel> hintMap =new HashMap<EncodeHintType, ErrorCorrectionLevel>();
+            hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
+            CreateQRCode(qrCodeData, charset, hintMap, smallestDimension, smallestDimension);
 
-        gen_btn = (Button) findViewById(R.id.gen_btn);
+        } catch (Exception ex) {
+            Log.e("QrGenerate",ex.getMessage());
+        }
+    }
 
-        image_ImageView = (ImageView) findViewById(R.id.image_ImageView);
-
-        gen_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                text2QR = text.getText().toString().trim();
-                MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
-                try{
-                    BitMatrix bitMatrix = multiFormatWriter.encode(text2QR, BarcodeFormat.QR_CODE, 200, 200);
-                    BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                    Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
-                    image_ImageView.setImageBitmap(bitmap);
+    public  void CreateQRCode(String qrCodeData, String charset, Map hintMap, int qrCodeheight, int qrCodewidth){
 
 
-                }
-                catch (WriterException e) {
+        try {
+            //generating qr code in bitmatrix type
+            BitMatrix matrix = new MultiFormatWriter().encode(new String(qrCodeData.getBytes(charset), charset),
+                    BarcodeFormat.QR_CODE, qrCodewidth, qrCodeheight, hintMap);
+            //converting bitmatrix to bitmap
 
+            int width = matrix.getWidth();
+            int height = matrix.getHeight();
+            int[] pixels = new int[width * height];
+            // All are 0, or black, by default
+            for (int y = 0; y < height; y++) {
+                int offset = y * width;
+                for (int x = 0; x < width; x++) {
+                    //pixels[offset + x] = matrix.get(x, y) ? BLACK : WHITE;
+                    pixels[offset + x] = matrix.get(x, y) ?
+                            ResourcesCompat.getColor(getResources(),R.color.colorPrimary,null) :WHITE;
                 }
             }
-        });
+
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+            //setting bitmap to image view
+
+            Bitmap overlay = BitmapFactory.decodeResource(getResources(), R.drawable.them);
+
+            imageViewBitmap.setImageBitmap(mergeBitmaps(overlay,bitmap));
+
+        }catch (Exception er){
+            Log.e("QrGenerate",er.getMessage());
+        }
+    }
 
 
 
+    public Bitmap mergeBitmaps(Bitmap overlay, Bitmap bitmap) {
+
+        int height = bitmap.getHeight();
+        int width = bitmap.getWidth();
+
+        Bitmap combined = Bitmap.createBitmap(width, height, bitmap.getConfig());
+        Canvas canvas = new Canvas(combined);
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+
+        canvas.drawBitmap(bitmap, new Matrix(), null);
+
+        int centreX = (canvasWidth  - overlay.getWidth()) /2;
+        int centreY = (canvasHeight - overlay.getHeight()) /2 ;
+        canvas.drawBitmap(overlay, centreX, centreY, null);
+
+        return combined;
     }
 }
