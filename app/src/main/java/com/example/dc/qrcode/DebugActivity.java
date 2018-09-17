@@ -52,7 +52,7 @@ public class DebugActivity extends AppCompatActivity {
                      case 2:
                         startActivity(new Intent(DebugActivity.this,CustomisedGenerator.class));break;
 
-
+//commit
                 }
 
             }
